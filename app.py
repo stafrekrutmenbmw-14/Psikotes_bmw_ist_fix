@@ -1,0 +1,182 @@
+import streamlit as st
+import pandas as pd
+import os
+from datetime import datetime
+
+# Impor fungsi modul subtes dari folder 'subtests'
+from subtests.subtest_1_se import render_subtest_1_se
+from subtests.subtest_2_wa import render_subtest_2_wa
+from subtests.subtest_3_an import render_subtest_3_an
+
+# --- KONFIGURASI HALAMAN ---
+st.set_page_config(
+    page_title="Portal Psikotes IST - PT Bumi Mas Wahyu",
+    page_icon="🧠",
+    layout="wide"
+)
+
+RESULTS_FILE = "rekap_ist_lengkap.csv"
+ADMIN_PASSWORD = "adminbmw"
+
+# --- KUNCI JAWABAN RESMI IST (SUBTES 1 - 3) ---
+ANSWER_KEYS = {
+    # Subtes 1 (SE): No 01 - 20
+    1: "e) kewibawaan", 2: "c) boros", 3: "d) gempa bumi", 4: "d) khianat", 5: "d) kuku",
+    6: "b) biasanya", 7: "c) lemak", 8: "a) lawan", 9: "e) hipotesis", 10: "b) sol",
+    11: "c) kotak PPPK", 12: "d) 20", 13: "d) konservatif", 14: "e) selalu", 15: "c) 800",
+    16: "a) kekuatan", 17: "b) biasanya", 18: "b) Bandung", 19: "c) kemungkinan menang", 20: "b) 130",
+
+    # Subtes 2 (WA): No 21 - 40
+    21: "b) panah", 22: "b) memaki", 23: "d) isi", 24: "c) melepaskan", 25: "c) perjalanan",
+    26: "c) tugas", 27: "c) payung", 28: "d) kasar", 29: "d) sepeda", 30: "a) biola",
+    31: "e) lurus", 32: "a) jam", 33: "a) kebijaksanaan", 34: "b) berjalan", 35: "c) potret",
+    36: "a) panjang", 37: "d) gunting", 38: "e) masyarakat", 39: "b) menasehati", 40: "c) bulu",
+
+    # Subtes 3 (AN): No 41 - 60
+    41: "c) melupakan", 42: "e) sangkar", 43: "d) jalan raya", 44: "d) gelang", 45: "d) kubus",
+    46: "a) menawarkan", 47: "d) tengik", 48: "b) sungai", 49: "e) pelindung", 50: "d) tukang emas",
+    51: "c) nada", 52: "c) kelakar", 53: "c) suasana hati", 54: "c) sutra", 55: "d) panjang senar",
+    56: "c) mutasi", 57: "c) es", 58: "d) dikikir", 59: "e) mikroskop", 60: "e) lautan api"
+}
+
+def calculate_scores():
+    user_answers = st.session_state.get("answers", {})
+    score_se = sum(1 for q_id in range(1, 21) if user_answers.get(q_id) == ANSWER_KEYS.get(q_id))
+    score_wa = sum(1 for q_id in range(21, 41) if user_answers.get(q_id) == ANSWER_KEYS.get(q_id))
+    score_an = sum(1 for q_id in range(41, 61) if user_answers.get(q_id) == ANSWER_KEYS.get(q_id))
+    total_raw = score_se + score_wa + score_an
+    return {
+        "Subtes_1_SE": score_se,
+        "Subtes_2_WA": score_wa,
+        "Subtes_3_AN": score_an,
+        "Total_Raw_Score": total_raw
+    }
+
+# --- SIDEBAR NAVIGASI SISTEM ---
+st.sidebar.title("📌 Navigasi Sistem")
+mode = st.sidebar.radio("Pilih Akses:", ["Portal Tes Pelamar", "Dashboard Admin HRD"])
+
+# --- INISIALISASI STATE UTAMA ---
+if "page" not in st.session_state: st.session_state.page = "register"
+if "current_subtest" not in st.session_state: st.session_state.current_subtest = 1
+if "user_info" not in st.session_state: st.session_state.user_info = {}
+if "answers" not in st.session_state: st.session_state.answers = {}
+if "admin_logged_in" not in st.session_state: st.session_state.admin_logged_in = False
+if "saved" not in st.session_state: st.session_state.saved = False
+
+# ==================================================================
+# MODE 1: PORTAL TES PELAMAR
+# ==================================================================
+if mode == "Portal Tes Pelamar":
+    if st.session_state.page == "register":
+        st.title("🏛️ PT Bumi Mas Wahyu")
+        st.subheader("Portal Psikotes Online - IST (Intelligenz-Struktur-Test)")
+        st.info("Mohon isi data diri Anda dengan lengkap sebelum memulai ujian.")
+
+        with st.form("form_registrasi_awal"):
+            nama = st.text_input("Nama Lengkap:")
+            email = st.text_input("Alamat Email:")
+            no_hp = st.text_input("Nomor WhatsApp / HP:")
+            # Isian teks bebas untuk posisi yang dilamar
+            posisi = st.text_input("Posisi yang Dilamar:", placeholder="Contoh: Staff Closing / Admin HR / Arsitek")
+
+            btn_start = st.form_submit_button("Mulai Tes IST 🚀", type="primary")
+
+            if btn_start:
+                if not nama or not email or not no_hp or not posisi:
+                    st.error("⚠️ Mohon isi seluruh data diri dan posisi yang dilamar secara lengkap!")
+                else:
+                    st.session_state.user_info = {
+                        "nama": nama,
+                        "email": email,
+                        "no_hp": no_hp,
+                        "posisi": posisi,
+                        "tanggal": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    }
+                    st.session_state.page = "test"
+                    st.session_state.current_subtest = 1
+                    st.rerun()
+
+    elif st.session_state.page == "test":
+        st.caption(
+            f"👤 Kandidat: **{st.session_state.user_info.get('nama', '')}** | "
+            f"💼 Posisi: **{st.session_state.user_info.get('posisi', '')}**"
+        )
+        st.markdown("---")
+
+        if st.session_state.current_subtest == 1:
+            render_subtest_1_se()
+
+        elif st.session_state.current_subtest == 2:
+            render_subtest_2_wa()
+
+        elif st.session_state.current_subtest == 3:
+            render_subtest_3_an()
+
+        elif st.session_state.current_subtest == 4:
+            st.session_state.page = "result"
+            st.rerun()
+
+    elif st.session_state.page == "result":
+        st.title("✅ Seluruh Subtes Selesai")
+        st.success(f"Terima kasih **{st.session_state.user_info.get('nama', '')}**, jawaban Anda telah berhasil disimpan.")
+
+        # PROSES PENILAIAN & PENYIMPANAN DATA
+        if not st.session_state.saved:
+            scores = calculate_scores()
+            record = {**st.session_state.user_info, **scores}
+            df_new = pd.DataFrame([record])
+
+            if os.path.exists(RESULTS_FILE):
+                df_old = pd.read_csv(RESULTS_FILE, sep=';')
+                df_final = pd.concat([df_old, df_new], ignore_index=True)
+            else:
+                df_final = df_new
+
+            df_final.to_csv(RESULTS_FILE, index=False, sep=';', encoding='utf-8-sig')
+            st.session_state.saved = True
+
+        st.info("Data hasil ujian telah disinkronkan langsung ke Dashboard Rekrutmen HRD PT Bumi Mas Wahyu.")
+
+# ==================================================================
+# MODE 2: DASHBOARD ADMIN HRD
+# ==================================================================
+elif mode == "Dashboard Admin HRD":
+    st.title("🔐 Dashboard Rekrutmen HRD - PT Bumi Mas Wahyu")
+
+    if not st.session_state.admin_logged_in:
+        pwd = st.text_input("Masukkan Kata Sandi Admin HRD:", type="password")
+        if st.button("Login HRD"):
+            if pwd == ADMIN_PASSWORD:
+                st.session_state.admin_logged_in = True
+                st.rerun()
+            else:
+                st.error("Kata sandi salah!")
+    else:
+        st.sidebar.button("Logout Admin", on_click=lambda: st.session_state.update({"admin_logged_in": False}))
+
+        if not os.path.exists(RESULTS_FILE):
+            st.warning("Belum ada data kandidat yang menyelesaikan tes.")
+        else:
+            df_results = pd.read_csv(RESULTS_FILE, sep=';')
+
+            col1, col2 = st.columns(2)
+            col1.metric("Total Kandidat Tes", len(df_results))
+            if "Total_Raw_Score" in df_results.columns:
+                col2.metric("Rata-rata Skor Mentah", f"{df_results['Total_Raw_Score'].mean():.1f}")
+
+            st.markdown("---")
+            posisi_filter = st.selectbox("Filter Berdasarkan Posisi:", ["Semua Posisi"] + list(df_results["posisi"].unique()))
+
+            df_display = df_results[df_results["posisi"] == posisi_filter] if posisi_filter != "Semua Posisi" else df_results
+
+            st.subheader("📋 Rekapitulasi Data Kandidat & Hasil Skor IST")
+            st.dataframe(df_display, use_container_width=True)
+
+            csv_data = df_display.to_csv(index=False, sep=';', encoding='utf-8-sig').encode('utf-8-sig')
+            st.download_button(
+                label="📥 Unduh Rekap Hasil Ujian (Format Excel / CSV)",
+                data=csv_data,
+                file_name=f"rekap_ist_bmw_{datetime.now().strftime('%Y%m%d')}.csv",
+                mime='text/csv'
+            )
