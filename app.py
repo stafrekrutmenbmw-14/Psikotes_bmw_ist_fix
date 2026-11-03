@@ -3,13 +3,15 @@ import pandas as pd
 import os
 from datetime import datetime
 
-# Impor modul Subtes 1 - 6 dari folder subtests
+# Impor modul Subtes 1 - 8 dari folder subtests
 from subtests.subtest_1_se import render_subtest_1_se
 from subtests.subtest_2_wa import render_subtest_2_wa
 from subtests.subtest_3_an import render_subtest_3_an
 from subtests.subtest_4_ge import render_subtest_4_ge
 from subtests.subtest_5_ra import render_subtest_5_ra
 from subtests.subtest_6_zr import render_subtest_6_zr
+from subtests.subtest_7_fa import render_subtest_7_fa
+from subtests.subtest_8_wu import render_subtest_8_wu
 
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(
@@ -21,7 +23,7 @@ st.set_page_config(
 RESULTS_FILE = "rekap_ist_lengkap.csv"
 ADMIN_PASSWORD = "adminbmw"
 
-# --- KUNCI JAWABAN RESMI IST (SUBTES 1 - 3, 5, 6) ---
+# --- KUNCI JAWABAN RESMI IST (SUBTES 1-3, 5-8) ---
 ANSWER_KEYS_MC = {
     # Subtes 1 (SE)
     1: "e) kewibawaan", 2: "c) boros", 3: "d) gempa bumi", 4: "d) khianat", 5: "d) kuku",
@@ -51,10 +53,22 @@ ANSWER_KEYS_MC = {
     97: "27", 98: "25", 99: "27", 100: "15", 101: "46",
     102: "10", 103: "42", 104: "7", 105: "5", 106: "14",
     107: "8", 108: "14", 109: "45", 110: "63", 111: "12",
-    112: "80", 113: "14", 114: "12", 115: "63", 116: "10"
+    112: "80", 113: "14", 114: "12", 115: "63", 116: "10",
+
+    # Subtes 7 (FA - Pemilihan Bentuk)
+    117: "a", 118: "c", 119: "d", 120: "b", 121: "d",
+    122: "e", 123: "c", 124: "e", 125: "e", 126: "d",
+    127: "d", 128: "b", 129: "d", 130: "c", 131: "b",
+    132: "e", 133: "b", 134: "d", 135: "c", 136: "a",
+
+    # Subtes 8 (WU - Benda Ruang)
+    137: "a", 138: "c", 139: "d", 140: "e", 141: "a",
+    142: "c", 143: "d", 144: "c", 145: "e", 146: "a",
+    147: "b", 148: "d", 149: "e", 150: "b", 151: "d",
+    152: "b", 153: "a", 154: "e", 155: "b", 156: "c"
 }
 
-# --- KUNCI KATA KUNCI GE (SUBTES 4: SKOR 2 DAN SKOR 1) ---
+# --- KUNCI KATA KUNCI GE (SUBTES 4) ---
 GE_KEYS = {
     61: {2: ["bunga", "kembang", "perdu"], 1: ["tumbuhan", "tumbuh-tumbuhan", "tangkai", "harum"]},
     62: {2: ["alat indera", "indera", "panca indera"], 1: ["organ", "alat tubuh"]},
@@ -95,8 +109,10 @@ def calculate_scores():
     score_ge = sum(calculate_ge_score(q_id, user_answers.get(q_id)) for q_id in range(61, 77))
     score_ra = sum(1 for q_id in range(77, 97) if str(user_answers.get(q_id, '')).strip() == ANSWER_KEYS_MC.get(q_id))
     score_zr = sum(1 for q_id in range(97, 117) if str(user_answers.get(q_id, '')).strip() == ANSWER_KEYS_MC.get(q_id))
+    score_fa = sum(1 for q_id in range(117, 137) if str(user_answers.get(q_id, '')).strip().lower() == ANSWER_KEYS_MC.get(q_id))
+    score_wu = sum(1 for q_id in range(137, 157) if str(user_answers.get(q_id, '')).strip().lower() == ANSWER_KEYS_MC.get(q_id))
     
-    total_raw = score_se + score_wa + score_an + score_ge + score_ra + score_zr
+    total_raw = score_se + score_wa + score_an + score_ge + score_ra + score_zr + score_fa + score_wu
     return {
         "Subtes_1_SE": score_se,
         "Subtes_2_WA": score_wa,
@@ -104,6 +120,8 @@ def calculate_scores():
         "Subtes_4_GE": score_ge,
         "Subtes_5_RA": score_ra,
         "Subtes_6_ZR": score_zr,
+        "Subtes_7_FA": score_fa,
+        "Subtes_8_WU": score_wu,
         "Total_Raw_Score": total_raw
     }
 
@@ -173,11 +191,15 @@ if mode == "Portal Tes Pelamar":
         elif st.session_state.current_subtest == 6:
             render_subtest_6_zr()
         elif st.session_state.current_subtest == 7:
+            render_subtest_7_fa()
+        elif st.session_state.current_subtest == 8:
+            render_subtest_8_wu()
+        elif st.session_state.current_subtest == 9:
             st.session_state.page = "result"
             st.rerun()
 
     elif st.session_state.page == "result":
-        st.title("✅ Seluruh Subtes 1 - 6 Selesai")
+        st.title("✅ Ujian Psikotes IST Selesai")
         st.success(f"Terima kasih **{st.session_state.user_info.get('nama', '')}**, jawaban Anda telah disimpan.")
 
         if not st.session_state.saved:
@@ -223,7 +245,7 @@ elif mode == "Dashboard Admin HRD":
             posisi_filter = st.selectbox("Filter Berdasarkan Posisi:", ["Semua Posisi"] + list(df_results["posisi"].unique()))
             df_display = df_results[df_results["posisi"] == posisi_filter] if posisi_filter != "Semua Posisi" else df_results
 
-            st.subheader("📋 Rekapitulasi Hasil IST Subtes 1 - 6")
+            st.subheader("📋 Rekapitulasi Hasil IST Subtes 1 - 8")
             st.dataframe(df_display, use_container_width=True)
 
             csv_data = df_display.to_csv(index=False, sep=';', encoding='utf-8-sig').encode('utf-8-sig')
