@@ -37,20 +37,23 @@ def render_subtest_6_zr():
         st.info("💡 Bacalah seluruh petunjuk dan contoh di bawah ini. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
         ### Aturan Pengerjaan:
-        Pada persoalan berikut diberikan deret angka. Setiap deret tersusun menurut pola/aturan tertentu. 
-        Carilah **satu angka berikutnya** dan ketikkan pada kolom jawaban!
+        Pada persoalan berikut diberikan deret angka. Setiap deret tersusun menurut pola/aturan tertentu.
+
+        **Instruksi Pengisian:**
+        Karena tes ini dilakukan secara *online*, Anda **tidak perlu mencoret angka** seperti pada lembar jawaban fisik.
+        Cukup **ketikkan angka jawaban lengkap berikutnya** pada kolom isian yang telah disediakan di bawah tiap soal.
 
         ---
         ### Contoh 01:
-        **2  4  6  8  10  12  14  ?**  
-        *Penjelasan:* Angka berikutnya selalu ditambah 2.  
-        **Jawaban:** **16**
+        **2   4   6   8   10   12   14   ?**  
+        *Penjelasan:* Pola deret selalu ditambah 2. Angka berikutnya adalah 16.  
+        **Ketikkan Jawaban:** **16**
 
         ---
         ### Contoh 02:
-        **9  7  10  8  11  9  12  ?**  
-        *Penjelasan:* Polanya berganti-ganti dikurangi 2 lalu ditambah 3.  
-        **Jawaban:** **10**
+        **9   7   10   8   11   9   12   ?**  
+        *Penjelasan:* Polanya berganti-ganti dikurangi 2 lalu ditambah 3. Angka berikutnya adalah 10.  
+        **Ketikkan Jawaban:** **10**
         """)
         st.markdown("---")
         if st.button("Mulai Kerjakan Subtes 6 🚀", type="primary"):
@@ -68,7 +71,7 @@ def render_subtest_6_zr():
 
         if remaining == 0:
             st.warning("⏰ Waktu Subtes 6 telah habis!")
-            if st.button("Selesaikan Seluruh Ujian ➔"):
+            if st.button("Lanjut ke Subtes 7 (FA) ➔"):
                 st.session_state.current_subtest = 7
                 st.rerun()
             st.stop()
@@ -105,6 +108,6 @@ def render_subtest_6_zr():
                 )
                 st.markdown("---")
 
-            if st.form_submit_button("Simpan & Selesaikan Seluruh Ujian ➔"):
+            if st.form_submit_button("Simpan & Lanjut ke Subtes 7 (FA) ➔"):
                 st.session_state.current_subtest = 7
                 st.rerun()
