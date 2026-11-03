@@ -33,37 +33,51 @@ def render_subtest_8_wu():
     if "answers" not in st.session_state:
         st.session_state.answers = {}
 
-    # TAHAP 1: PETUNJUK LENGKAP & CONTOH (TANPA TIMER)
+    # TAHAP 1: PETUNJUK LENGKAP & CONTOH (EKSAT SESUAI LEMBAR TES)
     if st.session_state.step_wu == "instruction":
-        st.title("📑 Petunjuk Subtes 08: WU (Benda Ruang)")
+        st.title("📑 PETUNJUK DAN CONTOH UNTUK KELOMPOK SOAL 08")
+        st.caption("(Soal-soal No. 137 – 156)")
         st.info("💡 Bacalah petunjuk dan pelajari contoh di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
         
         st.markdown("""
-        ### Aturan Pengerjaan:
-        Ditentukan **5 (lima) buah kubus a, b, c, d, e**. Pada tiap-tiap kubus terdapat enam tanda yang berlainan pada setiap sisinya. Tiga dari tanda itu dapat dilihat.
+        Ditentukan 5 (lima) buah kubus **a, b, c, d, e**. Pada tiap-tiap kubus terdapat enam tanda yang berlainan pada setiap sisinya. Tiga dari tanda itu dapat dilihat.
 
-        Kubus-kubus yang ditentukan itu (**a, b, c, d, e**) ialah kubus-kubus yang berbeda, artinya kubus-kubus itu dapat mempunyai tanda-tanda yang sama, akan tetapi susunannya berlainan.
+        Kubus-kubus yang ditentukan itu (**a, b, c, d, e**) ialah kubus-kubus yang berbeda, artinya kubus-kubus itu dapat mempunyai tanda-tanda yang sama, akan tetapi susunannya berlainan, setiap soal memperlihatkan salah satu kubus yang ditentukan di dalam kedudukan yang berbeda.
 
-        Setiap soal memperlihatkan salah satu kubus yang ditentukan di dalam **kedudukan yang berbeda**. Carilah kubus yang dimaksudkan itu!
-        
-        *Catatan:* Kubus dapat **diputar**, **digulingkan**, atau **diputar dan digulingkan** dalam pikiran Anda. Oleh karena itu, mungkin akan terlihat suatu tanda yang baru.
+        Carilah kubus yang dimaksudkan itu dan pilihlah jawaban yang sesuai.
+
+        Kubus itu dapat diputar, dapat digulingkan atau dapat diputar dan digulingkan dalam pikiran saudara, oleh karena itu mungkin akan terlihat suatu tanda yang baru.
         """)
 
         # Tampilkan Gambar Petunjuk & Contoh jika file tersedia
         petunjuk_img_path = "images/subtest_8_petunjuk.png"
         if os.path.exists(petunjuk_img_path):
-            st.image(petunjuk_img_path, caption="Lembar Petunjuk & Contoh Subtes 08 (WU)", use_container_width=True)
+            st.image(petunjuk_img_path, caption="Gambar Petunjuk & Contoh Subtes 08", use_container_width=True)
         else:
             st.warning("⚠️ File gambar `images/subtest_8_petunjuk.png` belum diunggah ke GitHub.")
 
         st.markdown("""
         ---
         ### Penjelasan Contoh Soal:
-        * **Contoh 08**: Memperlihatkan kubus **a** dengan kedudukan yang berbeda. Cara mendapatkannya adalah dengan menggulingkan lebih dulu kubus ke kiri satu kali dan kemudian diputar ke kiri satu kali.
-        * **Contoh kedua**: Merupakan kubus **e** (digulingkan ke kiri satu kali dan diputar ke kanan satu kali).
-        * **Contoh ketiga**: Merupakan kubus **b** (digulingkan ke kiri satu kali, sehingga memunculkan tanda baru dua segi empat hitam di depan).
-        * **Contoh keempat**: Menunjukkan kubus **c**.
-        * **Contoh kelima**: Menunjukkan kubus **d**.
+
+        **Contoh 08:**  
+        Contoh ini memperlihatkan kubus **a** dengan kedudukan yang berbeda.  
+        Mendapatkannya adalah dengan cara menggulingkan lebih dulu kubus itu ke kiri satu kali dan kemudian diputar ke kiri satu kali, sehingga sisi kubus yang bertanda dua segi empat hitam terletak di depan, seperti kubus **a**.  
+        Oleh karena itu, jawaban yang benar adalah **a**.
+
+        **Contoh kedua:**  
+        Contoh kedua adalah kubus **e**.  
+        Cara mendapatkannya adalah dengan digulingkan ke kiri satu kali dan diputar ke kanan satu kali, sehingga sisi kubus yang bertanda garis silang terletak di depan, seperti kubus **e**.
+
+        **Contoh ketiga:**  
+        Adalah kubus **b**.  
+        Cara mendapatkannya dengan menggulingkan ke kiri satu kali, sehingga dasar kubus yang tadinya tidak terlihat memunculkan tanda baru (dalam hal ini adalah tanda dua segi empat hitam) dan tanda silang pada sisi atas kubus itu menjadi tidak terlihat lagi.
+
+        **Contoh keempat:**  
+        Menunjukkan kubus **c**.
+
+        **Contoh kelima:**  
+        Adalah kubus **d**.
         """)
         st.markdown("---")
         
