@@ -45,7 +45,6 @@ def render_subtest_7_fa():
         Carilah di antara bentuk-bentuk utama yang ditentukan (**a, b, c, d, e**) bentuk yang dibangun dengan cara **menyusun potongan-potongan itu** sedemikian rupa, sehingga **tidak ada kelebihan sudut atau ruang di antaranya**.
         """)
 
-        # Tampilkan Gambar Petunjuk & Contoh jika file tersedia
         petunjuk_img_path = "images/subtest_7_petunjuk.png"
         if os.path.exists(petunjuk_img_path):
             st.image(petunjuk_img_path, caption="Lembar Petunjuk & Contoh Subtes 07 (FA)", use_container_width=True)
@@ -83,7 +82,6 @@ def render_subtest_7_fa():
                 st.rerun()
             st.stop()
 
-        # Tampilkan Gambar Lembar Soal Keseluruhan
         soal_img_path = "images/subtest_7_soal.png"
         if os.path.exists(soal_img_path):
             st.image(soal_img_path, caption="Lembar Soal Subtes 07 (FA) No. 117 - 136", use_container_width=True)
