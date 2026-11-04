@@ -18,8 +18,12 @@ def show_live_timer_ra(seconds_remaining):
             var displayS = s < 10 ? "0" + s : s;
             var elem = document.getElementById("timer_display_ra");
             if (elem) {{ elem.innerHTML = displayM + ":" + displayS; }}
-            if (timeLeft <= 0) {{ if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; }}
-            else {{ timeLeft--; }}
+            if (timeLeft <= 0) {{ 
+                if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; 
+                setTimeout(function() {{ window.parent.location.reload(); }}, 1000);
+            }} else {{ 
+                timeLeft--; 
+            }}
         }}
         updateDisplay();
         setInterval(updateDisplay, 1000);
@@ -34,26 +38,16 @@ def render_subtest_5_ra():
 
     if st.session_state.step_ra == "instruction":
         st.title("📑 Petunjuk Subtes 05: RA (Soal Hitungan)")
-        st.info("💡 Bacalah seluruh petunjuk dan contoh di bawah ini. **Timer belum berjalan di halaman ini.**")
+        st.info("💡 Bacalah petunjuk di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
         ### Aturan Pengerjaan:
-        Berikut adalah soal-soal hitungan matematika.
-
-        **Instruksi Pengisian:**
-        Karena tes ini dilakukan secara *online*, Anda **tidak perlu mencoret angka** seperti pada lembar jawaban fisik.
-        Cukup **ketikkan angka jawaban hasil perhitungan Anda** secara langsung pada kolom isian yang telah disediakan di bawah tiap soal.
+        Ketikkan jawaban berupa **angka hasil perhitungan** secara langsung pada kolom isian di bawah tiap soal.
 
         ---
-        ### Contoh 01:
+        ### Contoh:
         **Sebatang pensil harganya Rp 25,-. Berapakah harga 3 batang pensil?**  
         *Penjelasan:* 25 × 3 = 75.  
         **Ketikkan Jawaban:** **75**
-
-        ---
-        ### Contoh 02:
-        **Dengan kecepatan 4 km per jam, berapa km jarak yang dapat ditempuh dalam waktu 3 jam?**  
-        *Penjelasan:* 4 × 3 = 12.  
-        **Ketikkan Jawaban:** **12**
         """)
         st.markdown("---")
         if st.button("Mulai Kerjakan Subtes 5 🚀", type="primary"):
@@ -64,17 +58,18 @@ def render_subtest_5_ra():
     elif st.session_state.step_ra == "test":
         st.title("🧠 Subtes 05: RA (Soal Hitungan)")
         
-        # Alokasi resmi Subtes 5 RA = 10 Menit (600 Detik)
         elapsed = int(time.time() - st.session_state.start_time_ra)
         remaining = max(0, 600 - elapsed)
         show_live_timer_ra(remaining)
 
-        if remaining == 0:
-            st.warning("⏰ Waktu Subtes 5 telah habis!")
-            if st.button("Lanjut ke Subtes 6 (ZR) ➔"):
-                st.session_state.current_subtest = 6
-                st.rerun()
-            st.stop()
+        if remaining <= 0:
+            st.warning("⏰ Waktu Subtes 5 telah habis! Mengalihkan ke Subtes 6...")
+            for q_id in range(77, 97):
+                if f"ra_{q_id}" in st.session_state:
+                    st.session_state.answers[q_id] = st.session_state[f"ra_{q_id}"]
+            time.sleep(1)
+            st.session_state.current_subtest = 6
+            st.rerun()
 
         questions_ra = [
             {"id": 77, "no": "77", "q": "Jika seorang anak memiliki 5 kelereng dan diberi lagi 30 kelereng, berapa jumlah kelerengnya sekarang?"},
@@ -109,5 +104,8 @@ def render_subtest_5_ra():
                 st.markdown("---")
 
             if st.form_submit_button("Simpan & Lanjut ke Subtes 6 (ZR) ➔"):
+                for q_id in range(77, 97):
+                    if f"ra_{q_id}" in st.session_state:
+                        st.session_state.answers[q_id] = st.session_state[f"ra_{q_id}"]
                 st.session_state.current_subtest = 6
                 st.rerun()
