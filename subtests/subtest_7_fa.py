@@ -19,8 +19,12 @@ def show_live_timer_fa(seconds_remaining):
             var displayS = s < 10 ? "0" + s : s;
             var elem = document.getElementById("timer_display_fa");
             if (elem) {{ elem.innerHTML = displayM + ":" + displayS; }}
-            if (timeLeft <= 0) {{ if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; }}
-            else {{ timeLeft--; }}
+            if (timeLeft <= 0) {{ 
+                if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; 
+                setTimeout(function() {{ window.parent.location.reload(); }}, 1000);
+            }} else {{ 
+                timeLeft--; 
+            }}
         }}
         updateDisplay();
         setInterval(updateDisplay, 1000);
@@ -33,16 +37,13 @@ def render_subtest_7_fa():
     if "answers" not in st.session_state:
         st.session_state.answers = {}
 
-    # TAHAP 1: PETUNJUK LENGKAP & CONTOH (TANPA TIMER)
     if st.session_state.step_fa == "instruction":
         st.title("📑 Petunjuk Subtes 07: FA (Pemilihan Bentuk)")
-        st.info("💡 Bacalah petunjuk dan pelajari contoh di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
-        
+        st.info("💡 Bacalah petunjuk di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
         ### Aturan Pengerjaan:
-        Pada persoalan berikutnya, setiap soal memperlihatkan **suatu bentuk tertentu yang terpotong menjadi beberapa bagian**.
-
-        Carilah di antara bentuk-bentuk utama yang ditentukan (**a, b, c, d, e**) bentuk yang dibangun dengan cara **menyusun potongan-potongan itu** sedemikian rupa, sehingga **tidak ada kelebihan sudut atau ruang di antaranya**.
+        Pada soal-soal berikut terdapat potongan-potongan bentuk.
+        Carilah di antara bentuk-bentuk utama (**a, b, c, d, e**) bentuk yang dihasilkan jika potongan-potongan tersebut **disusun/digabungkan**.
         """)
 
         petunjuk_img_path = "images/subtest_7_petunjuk.png"
@@ -51,36 +52,27 @@ def render_subtest_7_fa():
         else:
             st.warning("⚠️ File gambar `images/subtest_7_petunjuk.png` belum diunggah ke GitHub.")
 
-        st.markdown("""
-        ---
-        ### Penjelasan Contoh Soal:
-        * **Contoh 07**: Potongan-potongan pada contoh 07 jika disusun (digabungkan) akan menghasilkan bentuk **a** (Lingkaran utuh).
-        * **Contoh kedua**: Potongan-potongan contoh kedua setelah disusun menghasilkan bentuk **e**.
-        * **Contoh ketiga**: Potongan-potongan contoh ketiga setelah disusun menghasilkan bentuk **b**.
-        * **Contoh keempat**: Potongan-potongan contoh keempat setelah disusun menghasilkan bentuk **d**.
-        """)
         st.markdown("---")
-        
         if st.button("Mulai Kerjakan Subtes 7 🚀", type="primary"):
             st.session_state.step_fa = "test"
             st.session_state.start_time_fa = time.time()
             st.rerun()
 
-    # TAHAP 2: PENGERJAAN SOAL (TIMER 7 MENIT BERJALAN)
     elif st.session_state.step_fa == "test":
         st.title("🧠 Subtes 07: FA (Pemilihan Bentuk)")
         
-        # Alokasi resmi Subtes 7 FA = 7 Menit (420 Detik)
         elapsed = int(time.time() - st.session_state.start_time_fa)
         remaining = max(0, 420 - elapsed)
         show_live_timer_fa(remaining)
 
-        if remaining == 0:
-            st.warning("⏰ Waktu Subtes 7 telah habis!")
-            if st.button("Lanjut ke Subtes 8 ➔"):
-                st.session_state.current_subtest = 8
-                st.rerun()
-            st.stop()
+        if remaining <= 0:
+            st.warning("⏰ Waktu Subtes 7 telah habis! Mengalihkan ke Subtes 8...")
+            for q_id in range(117, 137):
+                if f"fa_{q_id}" in st.session_state:
+                    st.session_state.answers[q_id] = st.session_state[f"fa_{q_id}"]
+            time.sleep(1)
+            st.session_state.current_subtest = 8
+            st.rerun()
 
         soal_img_path = "images/subtest_7_soal.png"
         if os.path.exists(soal_img_path):
@@ -94,8 +86,6 @@ def render_subtest_7_fa():
 
         with st.form("form_subtest_7"):
             col1, col2 = st.columns(2)
-            
-            # Kolom 1: Soal 117 - 126
             with col1:
                 st.markdown("#### Bagian 1 (No. 117 - 126)")
                 for q_id in range(117, 127):
@@ -105,8 +95,6 @@ def render_subtest_7_fa():
                         horizontal=True,
                         key=f"fa_{q_id}"
                     )
-            
-            # Kolom 2: Soal 127 - 136
             with col2:
                 st.markdown("#### Bagian 2 (No. 127 - 136)")
                 for q_id in range(127, 137):
@@ -118,6 +106,9 @@ def render_subtest_7_fa():
                     )
 
             st.markdown("---")
-            if st.form_submit_button("Simpan & Lanjut ke Subtes 8 ➔"):
+            if st.form_submit_button("Simpan & Lanjut ke Subtes 8 (WU) ➔"):
+                for q_id in range(117, 137):
+                    if f"fa_{q_id}" in st.session_state:
+                        st.session_state.answers[q_id] = st.session_state[f"fa_{q_id}"]
                 st.session_state.current_subtest = 8
                 st.rerun()
