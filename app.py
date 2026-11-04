@@ -23,6 +23,13 @@ st.set_page_config(
 RESULTS_FILE = "rekap_ist_lengkap.csv"
 ADMIN_PASSWORD = "adminbmw"
 
+# Caching pembacaan CSV agar dashboard cepat & tidak berat saat 100 peserta tes
+@st.cache_data(ttl=5)
+def load_results_data(file_path):
+    if os.path.exists(file_path):
+        return pd.read_csv(file_path, sep=';')
+    return pd.DataFrame()
+
 # --- KUNCI JAWABAN RESMI IST (SUBTES 1-3, 5-8) ---
 ANSWER_KEYS_MC = {
     # Subtes 1 (SE)
@@ -194,7 +201,7 @@ if mode == "Portal Tes Pelamar":
             render_subtest_7_fa()
         elif st.session_state.current_subtest == 8:
             render_subtest_8_wu()
-        elif st.session_state.current_subtest == 9:
+        elif st.session_state.current_subtest >= 9:
             st.session_state.page = "result"
             st.rerun()
 
@@ -215,6 +222,8 @@ if mode == "Portal Tes Pelamar":
 
             df_final.to_csv(RESULTS_FILE, index=False, sep=';', encoding='utf-8-sig')
             st.session_state.saved = True
+            # Invalidasi cache agar data baru langsung terbaca di Dashboard Admin HRD
+            st.cache_data.clear()
 
         st.info("Data hasil ujian telah disinkronkan langsung ke Dashboard Rekrutmen HRD PT Bumi Mas Wahyu.")
 
@@ -232,10 +241,11 @@ elif mode == "Dashboard Admin HRD":
     else:
         st.sidebar.button("Logout Admin", on_click=lambda: st.session_state.update({"admin_logged_in": False}))
 
-        if not os.path.exists(RESULTS_FILE):
+        df_results = load_results_data(RESULTS_FILE)
+
+        if df_results.empty:
             st.warning("Belum ada data kandidat yang menyelesaikan tes.")
         else:
-            df_results = pd.read_csv(RESULTS_FILE, sep=';')
             col1, col2 = st.columns(2)
             col1.metric("Total Kandidat Tes", len(df_results))
             if "Total_Raw_Score" in df_results.columns:
