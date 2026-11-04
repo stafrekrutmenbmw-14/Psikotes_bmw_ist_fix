@@ -18,8 +18,12 @@ def show_live_timer_zr(seconds_remaining):
             var displayS = s < 10 ? "0" + s : s;
             var elem = document.getElementById("timer_display_zr");
             if (elem) {{ elem.innerHTML = displayM + ":" + displayS; }}
-            if (timeLeft <= 0) {{ if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; }}
-            else {{ timeLeft--; }}
+            if (timeLeft <= 0) {{ 
+                if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; 
+                setTimeout(function() {{ window.parent.location.reload(); }}, 1000);
+            }} else {{ 
+                timeLeft--; 
+            }}
         }}
         updateDisplay();
         setInterval(updateDisplay, 1000);
@@ -37,23 +41,14 @@ def render_subtest_6_zr():
         st.info("💡 Bacalah seluruh petunjuk dan contoh di bawah ini. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
         ### Aturan Pengerjaan:
-        Pada persoalan berikut diberikan deret angka. Setiap deret tersusun menurut pola/aturan tertentu.
-
-        **Instruksi Pengisian:**
-        Karena tes ini dilakukan secara *online*, Anda **tidak perlu mencoret angka** seperti pada lembar jawaban fisik.
-        Cukup **ketikkan angka jawaban lengkap berikutnya** pada kolom isian yang telah disediakan di bawah tiap soal.
+        Pada tiap soal terdapat deret angka menurut aturan tertentu.
+        Ketikkan **angka jawaban berikutnya** pada kolom isian di bawah tiap soal.
 
         ---
-        ### Contoh 01:
+        ### Contoh:
         **2   4   6   8   10   12   14   ?**  
         *Penjelasan:* Pola deret selalu ditambah 2. Angka berikutnya adalah 16.  
         **Ketikkan Jawaban:** **16**
-
-        ---
-        ### Contoh 02:
-        **9   7   10   8   11   9   12   ?**  
-        *Penjelasan:* Polanya berganti-ganti dikurangi 2 lalu ditambah 3. Angka berikutnya adalah 10.  
-        **Ketikkan Jawaban:** **10**
         """)
         st.markdown("---")
         if st.button("Mulai Kerjakan Subtes 6 🚀", type="primary"):
@@ -64,17 +59,18 @@ def render_subtest_6_zr():
     elif st.session_state.step_zr == "test":
         st.title("🧠 Subtes 06: ZR (Deret Angka)")
         
-        # Alokasi resmi Subtes 6 ZR = 10 Menit (600 Detik)
         elapsed = int(time.time() - st.session_state.start_time_zr)
         remaining = max(0, 600 - elapsed)
         show_live_timer_zr(remaining)
 
-        if remaining == 0:
-            st.warning("⏰ Waktu Subtes 6 telah habis!")
-            if st.button("Lanjut ke Subtes 7 (FA) ➔"):
-                st.session_state.current_subtest = 7
-                st.rerun()
-            st.stop()
+        if remaining <= 0:
+            st.warning("⏰ Waktu Subtes 6 telah habis! Mengalihkan ke Subtes 7...")
+            for q_id in range(97, 117):
+                if f"zr_{q_id}" in st.session_state:
+                    st.session_state.answers[q_id] = st.session_state[f"zr_{q_id}"]
+            time.sleep(1)
+            st.session_state.current_subtest = 7
+            st.rerun()
 
         questions_zr = [
             {"id": 97, "no": "97", "q": "6   9   12   15   18   21   24   ?"},
@@ -109,5 +105,9 @@ def render_subtest_6_zr():
                 st.markdown("---")
 
             if st.form_submit_button("Simpan & Lanjut ke Subtes 7 (FA) ➔"):
+                for q_id in range(97, 117):
+                    if f"zr_{q_id}" in st.session_state:
+                        st.session_state.answers[q_id] = st.session_state[f"zr_{q_id}"]
                 st.session_state.current_subtest = 7
+                st.rerun()
                 st.rerun()
