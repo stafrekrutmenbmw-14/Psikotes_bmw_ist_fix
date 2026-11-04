@@ -18,8 +18,12 @@ def show_live_timer_ge(seconds_remaining):
             var displayS = s < 10 ? "0" + s : s;
             var elem = document.getElementById("timer_display_ge");
             if (elem) {{ elem.innerHTML = displayM + ":" + displayS; }}
-            if (timeLeft <= 0) {{ if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; }}
-            else {{ timeLeft--; }}
+            if (timeLeft <= 0) {{ 
+                if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; 
+                setTimeout(function() {{ window.parent.location.reload(); }}, 1000);
+            }} else {{ 
+                timeLeft--; 
+            }}
         }}
         updateDisplay();
         setInterval(updateDisplay, 1000);
@@ -34,23 +38,15 @@ def render_subtest_4_ge():
 
     if st.session_state.step_ge == "instruction":
         st.title("📑 Petunjuk Subtes 04: GE (Kesamaan Kata)")
-        st.info("💡 Bacalah seluruh petunjuk dan contoh di bawah ini. **Timer belum berjalan di halaman ini.**")
+        st.info("💡 Bacalah petunjuk di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
         ### Aturan Pengerjaan:
-        Ditentukan dua kata. Carilah **satu perkataan** yang meliputi pengertian kedua kata tadi! 
-        Ketikkan jawaban Anda pada kolom yang telah disediakan.
+        Ditentukan dua kata. Carilah **satu kata penggolongan/kesamaan umum** yang mencakup pengertian kedua kata tersebut.
 
         ---
-        ### Contoh 01:
-        **Ayam – Itik**  
-        Perkataan *"burung"* dapat meliputi pengertian kedua kata itu.  
-        **Jawaban:** **burung**
-
-        ---
-        ### Contoh 02:
-        **Gaun – Celana**  
-        Perkataan *"pakaian"* dapat meliputi pengertian kedua kata itu.  
-        **Jawaban:** **pakaian**
+        ### Contoh:
+        **Mawar - Melati**  
+        *Kesamaan:* **Bunga** (atau Kembang).
         """)
         st.markdown("---")
         if st.button("Mulai Kerjakan Subtes 4 🚀", type="primary"):
@@ -61,46 +57,50 @@ def render_subtest_4_ge():
     elif st.session_state.step_ge == "test":
         st.title("🧠 Subtes 04: GE (Kesamaan Kata)")
         
-        # Alokasi resmi Subtes 4 GE = 8 Menit (480 Detik)
         elapsed = int(time.time() - st.session_state.start_time_ge)
         remaining = max(0, 480 - elapsed)
         show_live_timer_ge(remaining)
 
-        if remaining == 0:
-            st.warning("⏰ Waktu Subtes 4 telah habis!")
-            if st.button("Lanjut ke Subtes 5 (RA) ➔"):
-                st.session_state.current_subtest = 5
-                st.rerun()
-            st.stop()
+        if remaining <= 0:
+            st.warning("⏰ Waktu Subtes 4 telah habis! Mengalihkan ke Subtes 5...")
+            for q_id in range(61, 77):
+                if f"ge_{q_id}" in st.session_state:
+                    st.session_state.answers[q_id] = st.session_state[f"ge_{q_id}"]
+            time.sleep(1)
+            st.session_state.current_subtest = 5
+            st.rerun()
 
         questions_ge = [
-            {"id": 61, "no": "61", "q": "mawar – melati"},
-            {"id": 62, "no": "62", "q": "mata – telinga"},
-            {"id": 63, "no": "63", "q": "gula – intan"},
-            {"id": 64, "no": "64", "q": "hujan – salju"},
-            {"id": 65, "no": "65", "q": "pengantar surat – telepon"},
-            {"id": 66, "no": "66", "q": "kamera – kacamata"},
-            {"id": 67, "no": "67", "q": "lambung – usus"},
-            {"id": 68, "no": "68", "q": "banyak – sedikit"},
-            {"id": 69, "no": "69", "q": "telur – benih"},
-            {"id": 70, "no": "70", "q": "bendera – lencana"},
-            {"id": 71, "no": "71", "q": "rumput – gajah"},
-            {"id": 72, "no": "72", "q": "ember – kantong"},
-            {"id": 73, "no": "73", "q": "awal – akhir"},
-            {"id": 74, "no": "74", "q": "kikir – boros"},
-            {"id": 75, "no": "75", "q": "penawaran – permintaan"},
-            {"id": 76, "no": "76", "q": "atas – bawah"}
+            {"id": 61, "no": "61", "q": "Mawar - Melati"},
+            {"id": 62, "no": "62", "q": "Mata - Telinga"},
+            {"id": 63, "no": "63", "q": "Intan - Arang"},
+            {"id": 64, "no": "64", "q": "Hujan - Salju"},
+            {"id": 65, "no": "65", "q": "Surat - Telegram"},
+            {"id": 66, "no": "66", "q": "Kaca Mata - Teropong"},
+            {"id": 67, "no": "67", "q": "Lambung - Usus"},
+            {"id": 68, "no": "68", "q": "Banyak - Sedikit"},
+            {"id": 69, "no": "69", "q": "Telur - Benih"},
+            {"id": 70, "no": "70", "q": "Bendera - Lencana"},
+            {"id": 71, "no": "71", "q": "Rumput - Gajah"},
+            {"id": 72, "no": "72", "q": "Ember - Kantong"},
+            {"id": 73, "no": "73", "q": "Awal - Akhir"},
+            {"id": 74, "no": "74", "q": "Kikir - Dermawan"},
+            {"id": 75, "no": "75", "q": "Penjualan - Pembelian"},
+            {"id": 76, "no": "76", "q": "Atas - Bawah"}
         ]
 
         with st.form("form_subtest_4"):
             for q in questions_ge:
                 st.markdown(f"**Soal {q['no']}.** {q['q']}")
                 st.session_state.answers[q['id']] = st.text_input(
-                    f"Jawaban Kesamaan Kata No. {q['no']}:", 
+                    f"Ketikkan Kata Kesamaan No. {q['no']}:",
                     key=f"ge_{q['id']}"
                 )
                 st.markdown("---")
 
             if st.form_submit_button("Simpan & Lanjut ke Subtes 5 (RA) ➔"):
+                for q_id in range(61, 77):
+                    if f"ge_{q_id}" in st.session_state:
+                        st.session_state.answers[q_id] = st.session_state[f"ge_{q_id}"]
                 st.session_state.current_subtest = 5
                 st.rerun()
