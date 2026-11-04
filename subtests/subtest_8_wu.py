@@ -19,8 +19,12 @@ def show_live_timer_wu(seconds_remaining):
             var displayS = s < 10 ? "0" + s : s;
             var elem = document.getElementById("timer_display_wu");
             if (elem) {{ elem.innerHTML = displayM + ":" + displayS; }}
-            if (timeLeft <= 0) {{ if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; }}
-            else {{ timeLeft--; }}
+            if (timeLeft <= 0) {{ 
+                if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; 
+                setTimeout(function() {{ window.parent.location.reload(); }}, 1000);
+            }} else {{ 
+                timeLeft--; 
+            }}
         }}
         updateDisplay();
         setInterval(updateDisplay, 1000);
@@ -33,76 +37,42 @@ def render_subtest_8_wu():
     if "answers" not in st.session_state:
         st.session_state.answers = {}
 
-    # TAHAP 1: PETUNJUK LENGKAP & CONTOH (EKSAT SESUAI LEMBAR TES)
     if st.session_state.step_wu == "instruction":
-        st.title("📑 PETUNJUK DAN CONTOH UNTUK KELOMPOK SOAL 08")
-        st.caption("(Soal-soal No. 137 – 156)")
-        st.info("💡 Bacalah petunjuk dan pelajari contoh di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
-        
+        st.title("📑 Petunjuk Subtes 08: WU (Benda Ruang)")
+        st.info("💡 Bacalah petunjuk di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
-        Ditentukan 5 (lima) buah kubus **a, b, c, d, e**. Pada tiap-tiap kubus terdapat enam tanda yang berlainan pada setiap sisinya. Tiga dari tanda itu dapat dilihat.
-
-        Kubus-kubus yang ditentukan itu (**a, b, c, d, e**) ialah kubus-kubus yang berbeda, artinya kubus-kubus itu dapat mempunyai tanda-tanda yang sama, akan tetapi susunannya berlainan, setiap soal memperlihatkan salah satu kubus yang ditentukan di dalam kedudukan yang berbeda.
-
-        Carilah kubus yang dimaksudkan itu dan pilihlah jawaban yang sesuai.
-
-        Kubus itu dapat diputar, dapat digulingkan atau dapat diputar dan digulingkan dalam pikiran saudara, oleh karena itu mungkin akan terlihat suatu tanda yang baru.
+        ### Aturan Pengerjaan:
+        Ditentukan 5 kubus (**a, b, c, d, e**). Setiap soal memperlihatkan salah satu kubus yang ditentukan di dalam kedudukan yang berbeda (diputar/digulingkan). Carilah kubus yang dimaksudkan itu!
         """)
 
-        # Tampilkan Gambar Petunjuk & Contoh jika file tersedia
         petunjuk_img_path = "images/subtest_8_petunjuk.png"
         if os.path.exists(petunjuk_img_path):
-            st.image(petunjuk_img_path, caption="Gambar Petunjuk & Contoh Subtes 08", use_container_width=True)
+            st.image(petunjuk_img_path, caption="Lembar Petunjuk & Contoh Subtes 08 (WU)", use_container_width=True)
         else:
             st.warning("⚠️ File gambar `images/subtest_8_petunjuk.png` belum diunggah ke GitHub.")
 
-        st.markdown("""
-        ---
-        ### Penjelasan Contoh Soal:
-
-        **Contoh 08:**  
-        Contoh ini memperlihatkan kubus **a** dengan kedudukan yang berbeda.  
-        Mendapatkannya adalah dengan cara menggulingkan lebih dulu kubus itu ke kiri satu kali dan kemudian diputar ke kiri satu kali, sehingga sisi kubus yang bertanda dua segi empat hitam terletak di depan, seperti kubus **a**.  
-        Oleh karena itu, jawaban yang benar adalah **a**.
-
-        **Contoh kedua:**  
-        Contoh kedua adalah kubus **e**.  
-        Cara mendapatkannya adalah dengan digulingkan ke kiri satu kali dan diputar ke kanan satu kali, sehingga sisi kubus yang bertanda garis silang terletak di depan, seperti kubus **e**.
-
-        **Contoh ketiga:**  
-        Adalah kubus **b**.  
-        Cara mendapatkannya dengan menggulingkan ke kiri satu kali, sehingga dasar kubus yang tadinya tidak terlihat memunculkan tanda baru (dalam hal ini adalah tanda dua segi empat hitam) dan tanda silang pada sisi atas kubus itu menjadi tidak terlihat lagi.
-
-        **Contoh keempat:**  
-        Menunjukkan kubus **c**.
-
-        **Contoh kelima:**  
-        Adalah kubus **d**.
-        """)
         st.markdown("---")
-        
         if st.button("Mulai Kerjakan Subtes 8 🚀", type="primary"):
             st.session_state.step_wu = "test"
             st.session_state.start_time_wu = time.time()
             st.rerun()
 
-    # TAHAP 2: PENGERJAAN SOAL (TIMER 9 MENIT BERJALAN)
     elif st.session_state.step_wu == "test":
         st.title("🧠 Subtes 08: WU (Benda Ruang)")
         
-        # Alokasi resmi Subtes 8 WU = 9 Menit (540 Detik)
         elapsed = int(time.time() - st.session_state.start_time_wu)
         remaining = max(0, 540 - elapsed)
         show_live_timer_wu(remaining)
 
-        if remaining == 0:
-            st.warning("⏰ Waktu Subtes 8 telah habis!")
-            if st.button("Lanjut ke Subtes 9 ➔"):
-                st.session_state.current_subtest = 9
-                st.rerun()
-            st.stop()
+        if remaining <= 0:
+            st.warning("⏰ Waktu Subtes 8 telah habis! Menyimpan seluruh jawaban dan mengalihkan ke Hasil Ujian...")
+            for q_id in range(137, 157):
+                if f"wu_{q_id}" in st.session_state:
+                    st.session_state.answers[q_id] = st.session_state[f"wu_{q_id}"]
+            time.sleep(1)
+            st.session_state.page = "result"
+            st.rerun()
 
-        # Tampilkan Gambar Lembar Soal Keseluruhan
         soal_img_path = "images/subtest_8_soal.png"
         if os.path.exists(soal_img_path):
             st.image(soal_img_path, caption="Lembar Soal Subtes 08 (WU) No. 137 - 156", use_container_width=True)
@@ -115,8 +85,6 @@ def render_subtest_8_wu():
 
         with st.form("form_subtest_8"):
             col1, col2 = st.columns(2)
-            
-            # Kolom 1: Soal 137 - 146
             with col1:
                 st.markdown("#### Bagian 1 (No. 137 - 146)")
                 for q_id in range(137, 147):
@@ -126,8 +94,6 @@ def render_subtest_8_wu():
                         horizontal=True,
                         key=f"wu_{q_id}"
                     )
-            
-            # Kolom 2: Soal 147 - 156
             with col2:
                 st.markdown("#### Bagian 2 (No. 147 - 156)")
                 for q_id in range(147, 157):
@@ -139,6 +105,9 @@ def render_subtest_8_wu():
                     )
 
             st.markdown("---")
-            if st.form_submit_button("Simpan & Lanjut ke Subtes 9 ➔"):
-                st.session_state.current_subtest = 9
+            if st.form_submit_button("Simpan & Selesaikan Ujian 🏁"):
+                for q_id in range(137, 157):
+                    if f"wu_{q_id}" in st.session_state:
+                        st.session_state.answers[q_id] = st.session_state[f"wu_{q_id}"]
+                st.session_state.page = "result"
                 st.rerun()
