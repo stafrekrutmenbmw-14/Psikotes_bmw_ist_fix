@@ -18,8 +18,12 @@ def show_live_timer_se(seconds_remaining):
             var displayS = s < 10 ? "0" + s : s;
             var elem = document.getElementById("timer_display_se");
             if (elem) {{ elem.innerHTML = displayM + ":" + displayS; }}
-            if (timeLeft <= 0) {{ if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; }}
-            else {{ timeLeft--; }}
+            if (timeLeft <= 0) {{ 
+                if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; 
+                setTimeout(function() {{ window.parent.location.reload(); }}, 1000);
+            }} else {{ 
+                timeLeft--; 
+            }}
         }}
         updateDisplay();
         setInterval(updateDisplay, 1000);
@@ -32,36 +36,18 @@ def render_subtest_1_se():
     if "answers" not in st.session_state:
         st.session_state.answers = {}
 
-    # TAHAP 1: INSTRUKSI & SELURUH CONTOH (TANPA TIMER)
     if st.session_state.step_se == "instruction":
         st.title("📑 Petunjuk Subtes 01: SE (Melengkapi Kalimat)")
-        st.info("💡 Bacalah seluruh petunjuk dan contoh di bawah ini. **Timer belum berjalan di halaman ini.**")
+        st.info("💡 Bacalah petunjuk dan contoh di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
         ### Aturan Pengerjaan:
-        Soal 01–20 terdiri atas kalimat-kalimat. Pada setiap kalimat, satu kata hilang dan disediakan 5 pilihan pengganti (**a, b, c, d, e**). 
-        Pilihlah kata yang paling tepat untuk menyempurnakan kalimat tersebut!
+        Pada soal-soal berikut diberikan kalimat-kalimat yang belum selesai. Carilah satu kata dari 5 pilihan yang tersedia (a, b, c, d, e) yang paling tepat untuk melengkapi kalimat tersebut.
 
         ---
-        ### Contoh 01:
-        Seekor kuda mempunyai kesamaan terbanyak dengan seekor .....
-        * a) kucing
-        * b) bajing
-        * c) keledai
-        * d) lembu
-        * e) anjing
-
-        **Jawaban yang benar:** **c) keledai**
-
-        ---
-        ### Contoh 02:
-        Lawannya "harapan" ialah .....
-        * a) duka
-        * b) putus asa
-        * c) sengsara
-        * d) cinta
-        * e) benci
-
-        **Jawaban yang benar:** **b) putus asa**
+        ### Contoh:
+        **Seekor kuda mempunyai kesamaan terbanyak dengan seekor ...**  
+        a) kucing | b) bajing | c) keledai | d) lembu | e) anjing  
+        *Jawaban yang benar adalah* **c) keledai**.
         """)
         st.markdown("---")
         if st.button("Mulai Kerjakan Subtes 1 🚀", type="primary"):
@@ -69,7 +55,6 @@ def render_subtest_1_se():
             st.session_state.start_time_se = time.time()
             st.rerun()
 
-    # TAHAP 2: PENGERJAAN SOAL (TIMER 6 MENIT BERJALAN)
     elif st.session_state.step_se == "test":
         st.title("🧠 Subtes 01: SE (Melengkapi Kalimat)")
         
@@ -77,46 +62,51 @@ def render_subtest_1_se():
         remaining = max(0, 360 - elapsed)
         show_live_timer_se(remaining)
 
-        if remaining == 0:
-            st.warning("⏰ Waktu Subtes 1 telah habis!")
-            if st.button("Lanjut ke Subtes 2 (WA) ➔"):
-                st.session_state.current_subtest = 2
-                st.rerun()
-            st.stop()
+        if remaining <= 0:
+            st.warning("⏰ Waktu Subtes 1 telah habis! Mengalihkan ke Subtes 2...")
+            for q_id in range(1, 21):
+                if f"se_{q_id}" in st.session_state:
+                    st.session_state.answers[q_id] = st.session_state[f"se_{q_id}"]
+            time.sleep(1)
+            st.session_state.current_subtest = 2
+            st.rerun()
 
         questions_se = [
-            {"id": 1, "no": "01", "q": "Pengaruh seseorang terhadap orang lain seharusnya bergantung pada .....", "options": ["a) kekuasaan", "b) bujukan", "c) kekayaan", "d) keberanian", "e) kewibawaan"]},
-            {"id": 2, "no": "02", "q": "Lawannya 'hemat' ialah ...............", "options": ["a) murah", "b) kikir", "c) boros", "d) bernilai", "e) kaya"]},
-            {"id": 3, "no": "03", "q": ".......... tidak termasuk cuaca", "options": ["a) angin puyuh", "b) halilintar", "c) salju", "d) gempa bumi", "e) kabut"]},
-            {"id": 4, "no": "04", "q": "Lawannya 'setia' ialah ...............", "options": ["a) cinta", "b) benci", "c) persahabatan", "d) khianat", "e) permusuhan"]},
-            {"id": 5, "no": "05", "q": "Seekor kuda selalu mempunyai ...............", "options": ["a) kandang", "b) ladam", "c) pelana", "d) kuku", "e) surai"]},
-            {"id": 6, "no": "06", "q": "Seorang paman ............... lebih tua dari kemenakannya.", "options": ["a) jarang", "b) biasanya", "c) selalu", "d) tidak pernah", "e) kadang-kadang"]},
-            {"id": 7, "no": "07", "q": "Pada jumlah yang sama, nilai kalori yang tertinggi terdapat pada ...............", "options": ["a) ikan", "b) daging", "c) lemak", "d) tahu", "e) sayuran"]},
-            {"id": 8, "no": "08", "q": "Pada suatu pertandingan selalu terdapat ...............", "options": ["a) lawan", "b) wasit", "c) penonton", "d) sorak", "e) kemenangan"]},
-            {"id": 9, "no": "09", "q": "Suatu pernyataan yang belum dipastikan dikatakan sebagai pernyataan yang .....", "options": ["a) paradoks", "b) tergesa-gesa", "c) mempunyai arti rangkap", "d) menyesatkan", "e) hipotesis"]},
-            {"id": 10, "no": "10", "q": "Pada sepatu selalu terdapat ...............", "options": ["a) kulit", "b) sol", "c) tali sepatu", "d) gesper", "e) lidah"]},
-            {"id": 11, "no": "11", "q": "Suatu ............... tidak menyangkut persoalan pencegahan kecelakaan.", "options": ["a) lampu lalu lintas", "b) kacamata pelindung", "c) kotak PPPK", "d) tanda peringatan", "e) palang kereta api"]},
-            {"id": 12, "no": "12", "q": "Mata uang logam Rp 50,- tahun 1991, garis tengahnya ialah ............... mm.", "options": ["a) 17", "b) 29", "c) 25", "d) 20", "e) 15"]},
-            {"id": 13, "no": "13", "q": "Seseorang yang bersikap menyangsikan setiap kemajuan ialah seorang yang .....", "options": ["a) demokratis", "b) radikal", "c) liberal", "d) konservatif", "e) anarkis"]},
-            {"id": 14, "no": "14", "q": "Lawannya 'tidak pernah' ialah ...............", "options": ["a) sering", "b) kadang-kadang", "c) jarang", "d) kerap kali", "e) selalu"]},
-            {"id": 15, "no": "15", "q": "Jarak antara Jakarta - Surabaya kira-kira ............... Km", "options": ["a) 650", "b) 1000", "c) 800", "d) 600", "e) 950"]},
-            {"id": 16, "no": "16", "q": "Untuk dapat membuat nada yang rendah dan mendalam, kita memerlukan banyak ....", "options": ["a) kekuatan", "b) peranan", "c) ayunan", "d) berat", "e) suara"]},
-            {"id": 17, "no": "17", "q": "Ayah ............... lebih berpengalaman dari pada anaknya", "options": ["a) selalu", "b) biasanya", "c) jauh", "d) jarang", "e) pada dasarnya"]},
-            {"id": 18, "no": "18", "q": "Diantara kota-kota berikut ini, maka kota ..... letaknya paling selatan.", "options": ["a) Jakarta", "b) Bandung", "c) Cirebon", "d) Semarang", "e) Surabaya"]},
-            {"id": 19, "no": "19", "q": "Jika kita mengetahui jumlah presentase nomor-nomor lotere yang tidak menang, maka kita dapat menghitung .....", "options": ["a) jumlah nomor yang menang", "b) pajak lotere", "c) kemungkinan menang", "d) jumlah pengikut", "e) tinggi keuntungan"]},
-            {"id": 20, "no": "20", "q": "Seorang anak yang berumur 10 tahun tingginya rata-rata ............... cm", "options": ["a) 150", "b) 130", "c) 110", "d) 105", "e) 115"]}
+            {"id": 1, "no": "01", "q": "Pengaruh seseorang terhadap orang lain harus tergantung pada ...", "opts": ["a) kekuasaan", "b) bujukan", "c) kekayaan", "d) keberanian", "e) kewibawaan"]},
+            {"id": 2, "no": "02", "q": "Lawan dari 'hemat' adalah ...", "opts": ["a) murah hati", "b) kikir", "c) boros", "d) kaya", "e) bernafsu"]},
+            {"id": 3, "no": "03", "q": "Bencana alam yang sering terjadi di daerah gunung berapi adalah ...", "opts": ["a) banjir", "b) angin taufan", "c) tanah longsor", "d) gempa bumi", "e) tsunami"]},
+            {"id": 4, "no": "04", "q": "Lawan dari 'setia' adalah ...", "opts": ["a) jahat", "b) benci", "c) bohong", "d) khianat", "e) lari"]},
+            {"id": 5, "no": "05", "q": "Harimau mempunyai kesamaan terbanyak dengan ...", "opts": ["a) serigala", "b) singa", "c) beruang", "d) kuku", "e) gajah"]},
+            {"id": 6, "no": "06", "q": "Seorang anak yang baru lahir ... mempunyai rambut.", "opts": ["a) selalu", "b) biasanya", "c) tidak pernah", "d) kadang-kadang", "e) jarang"]},
+            {"id": 7, "no": "07", "q": "Mentega dibuat dari ...", "opts": ["a) susu", "b) buah-buahan", "c) lemak", "d) tumbuh-tumbuhan", "e) minyak"]},
+            {"id": 8, "no": "08", "q": "Pada jumlah yang sama, nilai uang kertas ... nilai uang logam.", "opts": ["a) lawan", "b) lebih tinggi", "c) lebih rendah", "d) sama dengan", "e) berubah-ubah"]},
+            {"id": 9, "no": "09", "q": "Suatu dugaan yang belum terbukti kebenarannya disebut ...", "opts": ["a) kenyataan", "b) fakta", "c) peristiwa", "d) hukum", "e) hipotesis"]},
+            {"id": 10, "no": "10", "q": "Alas sepatu biasanya dibuat dari ...", "opts": ["a) kulit", "b) sol", "c) plastik", "d) karet", "e) kain"]},
+            {"id": 11, "no": "11", "q": "Di tempat kerja harus selalu disediakan ...", "opts": ["a) makanan", "b) alat pemadam", "c) kotak PPPK", "d) air minum", "e) tempat istirahat"]},
+            {"id": 12, "no": "12", "q": "Panjang sebuah pensil pada umumnya adalah ... cm.", "opts": ["a) 5", "b) 10", "c) 15", "d) 20", "e) 30"]},
+            {"id": 13, "no": "13", "q": "Orang yang tidak suka perubahan disebut ...", "opts": ["a) radikal", "b) maju", "c) luwes", "d) konservatif", "e) ekstrem"]},
+            {"id": 14, "no": "14", "q": "Matahari ... terbit di sebelah timur.", "opts": ["a) kadang-kadang", "b) sering", "c) biasanya", "d) tidak pernah", "e) selalu"]},
+            {"id": 15, "no": "15", "q": "Jarak antara Jakarta dan Surabaya kira-kira ... km.", "opts": ["a) 200", "b) 500", "c) 800", "d) 1200", "e) 1500"]},
+            {"id": 16, "no": "16", "q": "Kekuatan sebuah jembatan tergantung pada ... bahannya.", "opts": ["a) kekuatan", "b) berat", "c) harga", "d) warna", "e) keindahan"]},
+            {"id": 17, "no": "17", "q": "Anak-anak ... lebih pendek dari orang dewasa.", "opts": ["a) selalu", "b) biasanya", "c) tidak pernah", "d) kadang-kadang", "e) jarang"]},
+            {"id": 18, "no": "18", "q": "Kota yang terletak di Jawa Barat adalah ...", "opts": ["a) Semarang", "b) Bandung", "c) Surabaya", "d) Yogyakarta", "e) Surakarta"]},
+            {"id": 19, "no": "19", "q": "Kemenangan dalam pertandingan olahraga tergantung pada ...", "opts": ["a) Keberuntungan", "b) Penonton", "c) kemungkinan menang", "d) Hadiah", "e) Wasit"]},
+            {"id": 20, "no": "20", "q": "Tinggi badan rata-rata pria Indonesia adalah sekitar ... cm.", "opts": ["a) 120", "b) 130", "c) 165", "d) 190", "e) 200"]}
         ]
 
         with st.form("form_subtest_1"):
             for q in questions_se:
                 st.markdown(f"**Soal {q['no']}.** {q['q']}")
                 st.session_state.answers[q['id']] = st.radio(
-                    f"Pilih jawaban No. {q['no']}:", 
-                    options=q['options'], 
+                    f"Pilih Jawaban No. {q['no']}:",
+                    options=q['opts'],
                     key=f"se_{q['id']}"
                 )
                 st.markdown("---")
 
             if st.form_submit_button("Simpan & Lanjut ke Subtes 2 (WA) ➔"):
+                for q_id in range(1, 21):
+                    if f"se_{q_id}" in st.session_state:
+                        st.session_state.answers[q_id] = st.session_state[f"se_{q_id}"]
                 st.session_state.current_subtest = 2
                 st.rerun()
