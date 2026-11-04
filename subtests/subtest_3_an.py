@@ -18,8 +18,12 @@ def show_live_timer_an(seconds_remaining):
             var displayS = s < 10 ? "0" + s : s;
             var elem = document.getElementById("timer_display_an");
             if (elem) {{ elem.innerHTML = displayM + ":" + displayS; }}
-            if (timeLeft <= 0) {{ if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; }}
-            else {{ timeLeft--; }}
+            if (timeLeft <= 0) {{ 
+                if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; 
+                setTimeout(function() {{ window.parent.location.reload(); }}, 1000);
+            }} else {{ 
+                timeLeft--; 
+            }}
         }}
         updateDisplay();
         setInterval(updateDisplay, 1000);
@@ -32,38 +36,19 @@ def render_subtest_3_an():
     if "answers" not in st.session_state:
         st.session_state.answers = {}
 
-    # TAHAP 1: INSTRUKSI & SELURUH CONTOH (TANPA TIMER)
     if st.session_state.step_an == "instruction":
-        st.title("📑 Petunjuk Subtes 03: AN (Analogi Kata)")
-        st.info("💡 Bacalah seluruh petunjuk dan contoh di bawah ini. **Timer belum berjalan di halaman ini.**")
+        st.title("📑 Petunjuk Subtes 03: AN (Hubungan Kata / Analogi)")
+        st.info("💡 Bacalah petunjuk di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
         ### Aturan Pengerjaan:
-        Ditentukan 3 (tiga) kata. Antara kata pertama dan kata kedua terdapat suatu hubungan tertentu. 
-        Antara kata ketiga dan salah satu di antara lima kata pilihan harus pula terdapat **hubungan yang sama** itu. Carilah kata tersebut!
+        Ditentukan tiga kata. Antara kata pertama dan kata kedua terdapat suatu hubungan tertentu. 
+        Antara kata ketiga dan salah satu kata di antara 5 pilihan (a, b, c, d, e) harus pula terdapat **hubungan yang sama**.
 
         ---
-        ### Contoh 01:
-        **Hutan : pohon = tembok : ?**
-        * a) batu bata
-        * b) rumah
-        * c) semen
-        * d) putih
-        * e) dinding
-
-        **Penjelasan:** Hubungan antara *hutan* dan *pohon* ialah bahwa hutan terdiri atas pohon-pohon. Maka hubungan antara *tembok* dan salah satu kata pilihan ialah bahwa tembok terdiri atas batu-batu bata.  
-        **Jawaban yang benar:** **a) batu bata**
-
-        ---
-        ### Contoh 02:
-        **Gelap : terang = basah : ?**
-        * a) hujan
-        * b) hari
-        * c) lembab
-        * d) angin
-        * e) kering
-
-        **Penjelasan:** *Gelap* adalah lawan kata dari *terang*, maka untuk *basah* lawannya ialah *kering*.  
-        **Jawaban yang benar:** **e) kering**
+        ### Contoh:
+        **hutan : pohon = sawah : ...**  
+        a) beras | b) petani | c) padi | d) tanah | e) basah  
+        *Jawaban yang benar adalah* **c) padi** (karena hutan terdiri atas pohon, sawah terdiri atas padi).
         """)
         st.markdown("---")
         if st.button("Mulai Kerjakan Subtes 3 🚀", type="primary"):
@@ -71,55 +56,58 @@ def render_subtest_3_an():
             st.session_state.start_time_an = time.time()
             st.rerun()
 
-    # TAHAP 2: PENGERJAAN SOAL (TIMER 7 MENIT BERJALAN)
     elif st.session_state.step_an == "test":
-        st.title("🧠 Subtes 03: AN (Analogi Kata)")
+        st.title("🧠 Subtes 03: AN (Hubungan Kata)")
         
-        # Alokasi resmi Subtes 3 AN = 7 Menit (420 Detik)
         elapsed = int(time.time() - st.session_state.start_time_an)
         remaining = max(0, 420 - elapsed)
         show_live_timer_an(remaining)
 
-        if remaining == 0:
-            st.warning("⏰ Waktu Subtes 3 telah habis!")
-            if st.button("Selesaikan Ujian ➔"):
-                st.session_state.current_subtest = 4
-                st.rerun()
-            st.stop()
+        if remaining <= 0:
+            st.warning("⏰ Waktu Subtes 3 telah habis! Mengalihkan ke Subtes 4...")
+            for q_id in range(41, 61):
+                if f"an_{q_id}" in st.session_state:
+                    st.session_state.answers[q_id] = st.session_state[f"an_{q_id}"]
+            time.sleep(1)
+            st.session_state.current_subtest = 4
+            st.rerun()
 
         questions_an = [
-            {"id": 41, "no": "41", "q": "Menemukan : menghilangkan = Mengingat : ?", "options": ["a) menghapal", "b) mengenai", "c) melupakan", "d) berpikir", "e) memimpikan"]},
-            {"id": 42, "no": "42", "q": "Bunga : jambangan = Burung : ?", "options": ["a) sarang", "b) langit", "c) pagar", "d) pohon", "e) sangkar"]},
-            {"id": 43, "no": "43", "q": "Kereta api : rel = Otobis : ?", "options": ["a) roda", "b) poros", "c) ban", "d) jalan raya", "e) kecepatan"]},
-            {"id": 44, "no": "44", "q": "Perak : emas = Cincin : ?", "options": ["a) arloji", "b) berlian", "c) permata", "d) gelang", "e) platina"]},
-            {"id": 45, "no": "45", "q": "Lingkaran : bola = Bujur sangkar : ?", "options": ["a) bentuk", "b) gambar", "c) segi empat", "d) kubus", "e) piramida"]},
-            {"id": 46, "no": "46", "q": "Saran : kepustakaan = Merundingkan : ?", "options": ["a) menawarkan", "b) menentukan", "c) menilai", "d) menimbang", "e) merenungkan"]},
-            {"id": 47, "no": "47", "q": "Lidah : asam = Hidung : ?", "options": ["a) mencium", "b) bernapas", "c) mengecap", "d) tengik", "e) asin"]},
-            {"id": 48, "no": "48", "q": "Darah : pembuluh = Air : ?", "options": ["a) pintu air", "b) sungai", "c) talang", "d) hujan", "e) ember"]},
-            {"id": 49, "no": "49", "q": "Saraf : penyalur = Pupil : ?", "options": ["a) penyinaran", "b) mata", "c) melihat", "d) cahaya", "e) pelindung"]},
-            {"id": 50, "no": "50", "q": "Pengantar surat : pengantar telegram = Pandai besi : ?", "options": ["a) palu godam", "b) pedagang besi", "c) api", "d) tukang emas", "e) besi tempa"]},
-            {"id": 51, "no": "51", "q": "Buta : warna = Tuli : ?", "options": ["a) pendengaran", "b) mendengar", "c) nada", "d) kata", "e) telinga"]},
-            {"id": 52, "no": "52", "q": "Makanan : bumbu = Ceramah : ?", "options": ["a) penghinaan", "b) pidato", "c) kelakar", "d) kesan", "e) ayat"]},
-            {"id": 53, "no": "53", "q": "Marah : emosi = Duka cita : ?", "options": ["a) suka cita", "b) sakit hati", "c) suasana hati", "d) sedih", "e) rindu"]},
-            {"id": 54, "no": "54", "q": "Mantel : jubah = Wool : ?", "options": ["a) bahan sandang", "b) domba", "c) sutra", "d) jas", "e) tekstil"]},
-            {"id": 55, "no": "55", "q": "Ketinggian puncak : tekanan udara = Ketinggian nada : ?", "options": ["a) garpu tala", "b) sopran", "c) nyanyian", "d) panjang senar", "e) suara"]},
-            {"id": 56, "no": "56", "q": "Negara : revolusi = Hidup : ?", "options": ["a) biologi", "b) keturunan", "c) mutasi", "d) seleksi", "e) ilmu hewan"]},
-            {"id": 57, "no": "57", "q": "Kekurangan : penemuan = Panas : ?", "options": ["a) haus", "b) khatulistiwa", "c) es", "d) matahari", "e) dingin"]},
-            {"id": 58, "no": "58", "q": "Kayu : diketam = Besi : ?", "options": ["a) dipalu", "b) digergaji", "c) dituang", "d) dikikir", "e) ditempa"]},
-            {"id": 59, "no": "59", "q": "Olahragawan : lembing = Cendekiawan : ?", "options": ["a) perpustakaan", "b) penelitian", "c) karya", "d) studi", "e) mikroskop"]},
-            {"id": 60, "no": "60", "q": "Keledai : kuda pacuan = Pembakaran : ?", "options": ["a) pemadam api", "b) obor", "c) letupan", "d) korek api", "e) lautan api"]}
+            {"id": 41, "no": "41", "q": "menemukan : menghilangkan = mengingat : ...", "opts": ["a) menghapal", "b) memikirkan", "c) melupakan", "d) membayangkan", "e) mengulas"]},
+            {"id": 42, "no": "42", "q": "bunga : vas = burung : ...", "opts": ["a) sarang", "b) langit", "c) pohon", "d) dahan", "e) sangkar"]},
+            {"id": 43, "no": "43", "q": "kereta api : rel = bus : ...", "opts": ["a) roda", "b) bensin", "c) sopir", "d) jalan raya", "e) stasiun"]},
+            {"id": 44, "no": "44", "q": "sepatu : kaki = cincin : ...", "opts": ["a) tangan", "b) perhiasan", "c) emas", "d) gelang", "e) jari"]},
+            {"id": 45, "no": "45", "q": "lingkaran : bola = bujur sangkar : ...", "opts": ["a) segi empat", "b) piramida", "c) balok", "d) kubus", "e) segi tiga"]},
+            {"id": 46, "no": "46", "q": "meminta : mengemis = menyuruh : ...", "opts": ["a) menawarkan", "b) memaksa", "c) mengajak", "d) memerintah", "e) mengimbau"]},
+            {"id": 47, "no": "47", "q": "bunga : layu = mentega : ...", "opts": ["a) cair", "b) asin", "c) manis", "d) tengik", "e) beku"]},
+            {"id": 48, "no": "48", "q": "siang : malam = terang : ...", "opts": ["a) kelam", "b) sungai", "c) gelap", "d) awan", "e) senja"]},
+            {"id": 49, "no": "49", "q": "helm : kepala = perisai : ...", "opts": ["a) dada", "b) perang", "c) senjata", "d) baju besi", "e) pelindung"]},
+            {"id": 50, "no": "50", "q": "kayu : tukang kayu = emas : ...", "opts": ["a) tambang", "b) Perhiasan", "c) kaya", "d) tukang emas", "e) toko emas"]},
+            {"id": 51, "no": "51", "q": "lukisan : pelukis = lagu : ...", "opts": ["a) penyanyi", "b) musik", "c) nada", "d) komponis", "e) panggung"]},
+            {"id": 52, "no": "52", "q": "tangis : duka = tawa : ...", "opts": ["a) riang", "b) senyum", "c) kelakar", "d) gembira", "e) pesta"]},
+            {"id": 53, "no": "53", "q": "cuaca : iklim = perasaan : ...", "opts": ["a) jiwa", "b) watak", "c) suasana hati", "d) fikiran", "e) emosi"]},
+            {"id": 54, "no": "54", "q": "domba : bulu = ulat sutra : ...", "opts": ["a) kempis", "b) daun", "c) sutra", "d) kepompong", "e) benang"]},
+            {"id": 55, "no": "55", "q": "tinggi nada : frekuensi = nyaring nada : ...", "opts": ["a) amplitudo", "b) ritme", "c) tempo", "d) panjang senar", "e) pemutar"]},
+            {"id": 56, "no": "56", "q": "evolusi : revolusi = merayap : ...", "opts": ["a) berjalan", "b) berlari", "c) mutasi", "d) melompat", "e) terbang"]},
+            {"id": 57, "no": "57", "q": "air : uap = es : ...", "opts": ["a) dingin", "b) beku", "c) es", "d) salju", "e) air"]},
+            {"id": 58, "no": "58", "q": "pensil : diraut = pisau : ...", "opts": ["a) tajam", "b) memotong", "c) besi", "d) dikikir", "e) diasa"]},
+            {"id": 59, "no": "59", "q": "kuman : mikroskop = bintang : ...", "opts": ["a) malam", "b) langit", "c) teropong", "d) masehi", "e) mikroskop"]},
+            {"id": 60, "no": "60", "q": "api : kebakaran = banjir : ...", "opts": ["a) air", "b) hujan", "c) sungai", "d) bencana", "e) lautan api"]}
         ]
 
         with st.form("form_subtest_3"):
             for q in questions_an:
                 st.markdown(f"**Soal {q['no']}.** {q['q']}")
                 st.session_state.answers[q['id']] = st.radio(
-                    f"Pilih jawaban No. {q['no']}:", 
-                    options=q['options'], 
+                    f"Pilih Jawaban No. {q['no']}:",
+                    options=q['opts'],
                     key=f"an_{q['id']}"
                 )
                 st.markdown("---")
 
-            if st.form_submit_button("Simpan & Selesaikan Ujian ➔"):
+            if st.form_submit_button("Simpan & Lanjut ke Subtes 4 (GE) ➔"):
+                for q_id in range(41, 61):
+                    if f"an_{q_id}" in st.session_state:
+                        st.session_state.answers[q_id] = st.session_state[f"an_{q_id}"]
                 st.session_state.current_subtest = 4
                 st.rerun()
