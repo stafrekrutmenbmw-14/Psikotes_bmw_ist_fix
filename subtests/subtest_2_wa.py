@@ -18,8 +18,12 @@ def show_live_timer_wa(seconds_remaining):
             var displayS = s < 10 ? "0" + s : s;
             var elem = document.getElementById("timer_display_wa");
             if (elem) {{ elem.innerHTML = displayM + ":" + displayS; }}
-            if (timeLeft <= 0) {{ if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; }}
-            else {{ timeLeft--; }}
+            if (timeLeft <= 0) {{ 
+                if (elem) elem.innerHTML = "00:00 (WAKTU HABIS)"; 
+                setTimeout(function() {{ window.parent.location.reload(); }}, 1000);
+            }} else {{ 
+                timeLeft--; 
+            }}
         }}
         updateDisplay();
         setInterval(updateDisplay, 1000);
@@ -32,36 +36,18 @@ def render_subtest_2_wa():
     if "answers" not in st.session_state:
         st.session_state.answers = {}
 
-    # TAHAP 1: INSTRUKSI & SELURUH CONTOH (TANPA TIMER)
     if st.session_state.step_wa == "instruction":
         st.title("📑 Petunjuk Subtes 02: WA (Mencari Kata Berbeda)")
-        st.info("💡 Bacalah seluruh petunjuk dan contoh di bawah ini. **Timer belum berjalan di halaman ini.**")
+        st.info("💡 Bacalah petunjuk di bawah ini dengan teliti. **Timer belum berjalan di halaman ini.**")
         st.markdown("""
         ### Aturan Pengerjaan:
-        Ditentukan 5 (lima) kata pada setiap soal. Pada 4 dari 5 kata itu terdapat suatu kesamaan. 
-        Carilah 1 (satu) kata kelima yang **TIDAK memiliki kesamaan** dengan keempat kata lainnya!
+        Ditentukan 5 kata. Empat dari 5 kata itu mempunyai kesamaan/kelompok tertentu. 
+        Carilah **satu kata yang tidak memiliki kesamaan** dengan 4 kata lainnya.
 
         ---
-        ### Contoh 01:
-        * a) meja
-        * b) kursi
-        * c) burung
-        * d) lemari
-        * e) tempat tidur
-
-        **Penjelasan:** a), b), d), dan e) adalah perabot rumah (*meubel*), sedangkan **c) burung** bukan perabot rumah.  
-        **Jawaban yang benar:** **c) burung**
-
-        ---
-        ### Contoh 02:
-        * a) duduk
-        * b) berbaring
-        * c) berdiri
-        * d) berjalan
-        * e) berjongkok
-
-        **Penjelasan:** a), b), c), dan e) menunjukkan keadaan tidak bergerak, sedangkan **d) berjalan** menunjukkan keadaan bergerak.  
-        **Jawaban yang benar:** **d) berjalan**
+        ### Contoh:
+        a) meja | b) kursi | c) burung | d) lemari | e) tempat tidur  
+        *Jawaban yang benar adalah* **c) burung** (karena yang lain adalah perabot rumah tangga).
         """)
         st.markdown("---")
         if st.button("Mulai Kerjakan Subtes 2 🚀", type="primary"):
@@ -69,7 +55,6 @@ def render_subtest_2_wa():
             st.session_state.start_time_wa = time.time()
             st.rerun()
 
-    # TAHAP 2: PENGERJAAN SOAL (TIMER 6 MENIT BERJALAN)
     elif st.session_state.step_wa == "test":
         st.title("🧠 Subtes 02: WA (Mencari Kata Berbeda)")
         
@@ -77,46 +62,51 @@ def render_subtest_2_wa():
         remaining = max(0, 360 - elapsed)
         show_live_timer_wa(remaining)
 
-        if remaining == 0:
-            st.warning("⏰ Waktu Subtes 2 telah habis!")
-            if st.button("Lanjut ke Subtes 3 (AN) ➔"):
-                st.session_state.current_subtest = 3
-                st.rerun()
-            st.stop()
+        if remaining <= 0:
+            st.warning("⏰ Waktu Subtes 2 telah habis! Mengalihkan ke Subtes 3...")
+            for q_id in range(21, 41):
+                if f"wa_{q_id}" in st.session_state:
+                    st.session_state.answers[q_id] = st.session_state[f"wa_{q_id}"]
+            time.sleep(1)
+            st.session_state.current_subtest = 3
+            st.rerun()
 
         questions_wa = [
-            {"id": 21, "no": "21", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) lingkaran", "b) panah", "c) elips", "d) busur", "e) lengkungan"]},
-            {"id": 22, "no": "22", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) mengetuk", "b) memaki", "c) menjahit", "d) menggergaji", "e) memukul"]},
-            {"id": 23, "no": "23", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) lebar", "b) keliling", "c) luas", "d) isi", "e) panjang"]},
-            {"id": 24, "no": "24", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) mengikat", "b) menyatukan", "c) melepaskan", "d) mengaitkan", "e) melekatkan"]},
-            {"id": 25, "no": "25", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) arah", "b) timur", "c) perjalanan", "d) tujuan", "e) selatan"]},
-            {"id": 26, "no": "26", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) jarak", "b) perpisahan", "c) tugas", "d) batas", "e) perceraian"]},
-            {"id": 27, "no": "27", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) saringan", "b) kelambu", "c) payung", "d) tapisan", "e) jala"]},
-            {"id": 28, "no": "28", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) putih", "b) pucat", "c) buram", "d) kasar", "e) berkilauan"]},
-            {"id": 29, "no": "29", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) otobis", "b) pesawat terbang", "c) sepeda motor", "d) sepeda", "e) kapal api"]},
-            {"id": 30, "no": "30", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) biola", "b) seruling", "c) klarinet", "d) terompet", "e) saxophon"]},
-            {"id": 31, "no": "31", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) bergelombang", "b) kasar", "c) berduri", "d) licin", "e) lurus"]},
-            {"id": 32, "no": "32", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) jam", "b) kompas", "c) penunjuk jalan", "d) bintang pari", "e) arah"]},
-            {"id": 33, "no": "33", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) kebijaksanaan", "b) pendidikan", "c) perencanaan", "d) penempatan", "e) pengerahan"]},
-            {"id": 34, "no": "34", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) bermotor", "b) berjalan", "c) berlayar", "d) bersepeda", "e) berkuda"]},
-            {"id": 35, "no": "35", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) gambar", "b) lukisan", "c) potret", "d) patung", "e) ukiran"]},
-            {"id": 36, "no": "36", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) panjang", "b) lonjong", "c) runcing", "d) bulat", "e) bersudut"]},
-            {"id": 37, "no": "37", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) kunci", "b) palang pintu", "c) gerendel", "d) gunting", "e) obeng"]},
-            {"id": 38, "no": "38", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) jembatan", "b) batas", "c) perkawinan", "d) pagar", "e) masyarakat"]},
-            {"id": 39, "no": "39", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) mengetam", "b) menasehati", "c) mengasah", "d) melicinkan", "e) menggosok"]},
-            {"id": 40, "no": "40", "q": "Pilihlah satu kata yang tidak memiliki kesamaan:", "options": ["a) batu", "b) baja", "c) bulu", "d) karet", "e) kayu"]}
+            {"id": 21, "no": "21", "opts": ["a) lingkaran", "b) panah", "c) elips", "d) busur", "e) lengkung"]},
+            {"id": 22, "no": "22", "opts": ["a) mengetuk", "b) memaki", "c) menjatuhkan", "d) merusak", "e) memukul"]},
+            {"id": 23, "no": "23", "opts": ["a) luas", "b) lebar", "c) panjang", "d) isi", "e) tinggi"]},
+            {"id": 24, "no": "24", "opts": ["a) mengikat", "b) menyatukan", "c) melepaskan", "d) menyambung", "e) menggabungkan"]},
+            {"id": 25, "no": "25", "opts": ["a) arah", "b) timur", "c) perjalanan", "d) utara", "e) selatan"]},
+            {"id": 26, "no": "26", "opts": ["a) janji", "b) kontrak", "c) tugas", "d) persetujuan", "e) ikatan"]},
+            {"id": 27, "no": "27", "opts": ["a) topi", "b) helm", "c) payung", "d) peci", "e) mahkota"]},
+            {"id": 28, "no": "28", "opts": ["a) licin", "b) rata", "c) halus", "d) kasar", "e) teratur"]},
+            {"id": 29, "no": "29", "opts": ["a) mobil", "b) sepeda motor", "c) truk", "d) sepeda", "e) bus"]},
+            {"id": 30, "no": "30", "opts": ["a) biola", "b) seruling", "c) terompet", "d) harmonika", "e) kuis"]},
+            {"id": 31, "no": "31", "opts": ["a) melengkung", "b) bungkuk", "c) bengkok", "d) miring", "e) lurus"]},
+            {"id": 32, "no": "32", "opts": ["a) jam", "b) masehi", "c) bulan", "d) tahun", "e) abad"]},
+            {"id": 33, "no": "33", "opts": ["a) kebijaksanaan", "b) keindahan", "c) keberanian", "d) kejujuran", "e) kebaikan"]},
+            {"id": 34, "no": "34", "opts": ["a) berlari", "b) berjalan", "c) melompat", "d) memanjat", "e) berenang"]},
+            {"id": 35, "no": "35", "opts": ["a) cermin", "b) teropong", "c) potret", "d) kacamata", "e) mikroskop"]},
+            {"id": 36, "no": "36", "opts": ["a) panjang", "b) lonjong", "c) segitiga", "d) segi empat", "e) lingkaran"]},
+            {"id": 37, "no": "37", "opts": ["a) cangkul", "b) sekop", "c) sabit", "d) gunting", "e) linggis"]},
+            {"id": 38, "no": "38", "opts": ["a) keluarga", "b) suku", "c) bangsa", "d) perkumpulan", "e) masyarakat"]},
+            {"id": 39, "no": "39", "opts": ["a) mengajar", "b) menasehati", "c) melatih", "d) membimbing", "e) membina"]},
+            {"id": 40, "no": "40", "opts": ["a) sisik", "b) cangkang", "c) bulu", "d) kulit", "e) tanduk"]}
         ]
 
         with st.form("form_subtest_2"):
             for q in questions_wa:
-                st.markdown(f"**Soal {q['no']}.** {q['q']}")
+                st.markdown(f"**Soal {q['no']}.** Pilih kata yang paling berbeda:")
                 st.session_state.answers[q['id']] = st.radio(
-                    f"Pilih jawaban No. {q['no']}:", 
-                    options=q['options'], 
+                    f"Pilihan Jawaban No. {q['no']}:",
+                    options=q['opts'],
                     key=f"wa_{q['id']}"
                 )
                 st.markdown("---")
 
             if st.form_submit_button("Simpan & Lanjut ke Subtes 3 (AN) ➔"):
+                for q_id in range(21, 41):
+                    if f"wa_{q_id}" in st.session_state:
+                        st.session_state.answers[q_id] = st.session_state[f"wa_{q_id}"]
                 st.session_state.current_subtest = 3
                 st.rerun()
